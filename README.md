@@ -3,6 +3,7 @@
   <img src="https://img.shields.io/badge/LangChain-0.3-green?style=for-the-badge&logo=chainlink&logoColor=white" />
   <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
   <img src="https://img.shields.io/badge/ChromaDB-Vector_Store-orange?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Ollama-Local_LLM-purple?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
 </p>
 
@@ -24,7 +25,7 @@ This is not a wrapper around ChatGPT. This project demonstrates deep understandi
 |---|---|
 | **Document Processing** | Multi-format ingestion (PDF, web scraping, SQL databases, CSV, DOCX, HTML) with fallback strategies including OCR |
 | **Text Chunking** | Recursive character splitting with configurable size/overlap to optimize retrieval quality |
-| **Embedding Models** | Abstracted factory supporting OpenAI, HuggingFace (free/local), and Cohere embeddings |
+| **Embedding Models** | Abstracted factory supporting OpenAI, HuggingFace (free/local), Cohere, and Ollama embeddings |
 | **Vector Databases** | ChromaDB (lightweight) and Qdrant (production-grade) with collection management |
 | **Retrieval Strategies** | Similarity search, MMR (diversity), and two-stage reranking with cross-encoders |
 | **LLM Integration** | Multi-provider support (OpenAI, Anthropic, Ollama/local) with grounded prompting |
@@ -80,13 +81,13 @@ This is not a wrapper around ChatGPT. This project demonstrates deep understandi
 ### Prerequisites
 
 - Python 3.10+
-- An API key from **one** of: OpenAI, Anthropic, or a local [Ollama](https://ollama.ai) installation
+- An API key from **one** of: OpenAI, Anthropic, or a local [Ollama](https://ollama.ai) installation (free)
 
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/yourusername/private-rag-chatbot.git
-cd private-rag-chatbot
+git clone https://github.com/loichoi18/Private-Chatbot-RAG.git
+cd Private-Chatbot-RAG
 
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -96,12 +97,31 @@ pip install -r requirements.txt
 
 ### 2. Configure
 
+**Option A — Fully free with Ollama (recommended to try first):**
+
 ```bash
+# Install Ollama from https://ollama.ai then:
+ollama pull llama3.2
+ollama pull nomic-embed-text
+
 cp .env.example .env
-# Edit .env with your API key and preferences
 ```
 
-**Minimum required:** Set `OPENAI_API_KEY` in `.env` (or configure Ollama for a fully free/local setup).
+Edit `.env` and set:
+```env
+LLM_PROVIDER=ollama
+LLM_MODEL=llama3.2
+EMBEDDING_PROVIDER=ollama
+EMBEDDING_MODEL=nomic-embed-text
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+**Option B — With OpenAI (best quality):**
+
+```bash
+cp .env.example .env
+# Edit .env and set OPENAI_API_KEY=sk-your-key-here
+```
 
 ### 3. Ingest Documents
 
@@ -149,7 +169,7 @@ docker-compose up --build
 
 The web interface provides:
 - 💬 Chat with your documents in a familiar interface
-- 📤 Upload files directly from the sidebar
+- 📤 Upload files directly from the sidebar (PDF, TXT, CSV, DOCX, HTML, Markdown)
 - 🌐 Add web pages by URL
 - ⚙️ Switch retrieval strategies (similarity / MMR / rerank)
 - 📎 View source citations for every answer
@@ -180,7 +200,7 @@ curl http://localhost:8000/api/stats
 
 ### Multi-Turn Conversation
 
-The chatbot supports follow-up questions:
+The chatbot supports follow-up questions with conversation memory:
 
 ```json
 {
@@ -197,7 +217,7 @@ The chatbot supports follow-up questions:
 ## 📁 Project Structure
 
 ```
-private-rag-chatbot/
+Private-Chatbot-RAG/
 │
 ├── config/
 │   └── settings.py          # Centralized configuration (Pydantic Settings)
@@ -211,7 +231,7 @@ private-rag-chatbot/
 │   │   └── text_splitter.py  # Chunking with RecursiveCharacterTextSplitter
 │   │
 │   ├── embedding/
-│   │   └── embedder.py       # Embedding factory (OpenAI / HuggingFace / Cohere)
+│   │   └── embedder.py       # Embedding factory (OpenAI / HuggingFace / Cohere / Ollama)
 │   │
 │   ├── vectorstore/
 │   │   └── store.py          # Vector store manager (ChromaDB / Qdrant)
@@ -263,23 +283,24 @@ All settings are managed through environment variables (`.env` file). Key option
 |---|---|---|---|
 | **OpenAI** | `gpt-4o-mini` | ~$0.15/1M tokens | Set `OPENAI_API_KEY` |
 | **Anthropic** | `claude-3-5-sonnet` | ~$3/1M tokens | Set `ANTHROPIC_API_KEY` |
-| **Ollama** | `llama3.1` | **Free (local)** | Install [Ollama](https://ollama.ai), run `ollama pull llama3.1` |
+| **Ollama** | `llama3.2` | **Free (local)** | Install [Ollama](https://ollama.ai), run `ollama pull llama3.2` |
 
 ### Embedding Providers
 
 | Provider | Model | Dimensions | Cost |
 |---|---|---|---|
 | **OpenAI** | `text-embedding-3-small` | 1536 | ~$0.02/1M tokens |
+| **Ollama** | `nomic-embed-text` | 768 | **Free (local)** |
 | **HuggingFace** | `all-MiniLM-L6-v2` | 384 | **Free (local)** |
 | **Cohere** | `embed-english-v3.0` | 1024 | Free tier available |
 
-### Fully Free/Local Setup
+### Fully Free/Local Setup (No API Keys Needed)
 
 ```env
 LLM_PROVIDER=ollama
-LLM_MODEL=llama3.1
-EMBEDDING_PROVIDER=huggingface
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+LLM_MODEL=llama3.2
+EMBEDDING_PROVIDER=ollama
+EMBEDDING_MODEL=nomic-embed-text
 VECTORSTORE_PROVIDER=chroma
 ```
 
@@ -329,7 +350,7 @@ LLMs are trained on public data and hallucinate when asked about private/domain-
 ## 🗺️ Roadmap
 
 - [x] Multi-format document ingestion (PDF, Web, DB, Files)
-- [x] Multiple embedding providers
+- [x] Multiple embedding providers (OpenAI, HuggingFace, Cohere, Ollama)
 - [x] Multiple LLM providers (including local/free Ollama)
 - [x] Advanced retrieval (Similarity, MMR, Reranking)
 - [x] Conversation memory for multi-turn chat
@@ -369,6 +390,7 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - [ChromaDB](https://github.com/chroma-core/chroma) — Open-source embedding database
 - [Streamlit](https://streamlit.io) — Rapid UI development
 - [FastAPI](https://fastapi.tiangolo.com) — Modern Python web framework
+- [Ollama](https://ollama.ai) — Run LLMs locally
 
 ---
 
