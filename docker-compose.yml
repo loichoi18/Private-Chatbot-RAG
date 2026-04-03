@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  # ── FastAPI Backend ──────────────────────────────────────
+  api:
+    build: .
+    container_name: rag-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    command: uvicorn src.api.routes:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  # ── Streamlit UI ─────────────────────────────────────────
+  ui:
+    build: .
+    container_name: rag-ui
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    command: streamlit run src/ui/app.py --server.port 8501 --server.address 0.0.0.0
+    restart: unless-stopped
+
+  # ── Qdrant (optional — uncomment to use) ─────────────────
+  # qdrant:
+  #   image: qdrant/qdrant:latest
+  #   container_name: rag-qdrant
+  #   ports:
+  #     - "6333:6333"
+  #   volumes:
+  #     - qdrant_data:/qdrant/storage
+  #   restart: unless-stopped
+
+# volumes:
+#   qdrant_data:
