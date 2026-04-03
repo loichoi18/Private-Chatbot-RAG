@@ -12,7 +12,7 @@
 **Build an AI chatbot that answers questions using YOUR private documents — not the internet.**
 
 A production-ready Retrieval-Augmented Generation (RAG) system that ingests PDFs, web pages, databases, and text files into a vector store, then uses an LLM to generate accurate, source-cited answers grounded entirely in your data.
-
+> 🚀 **[Live Demo on Hugging Face](https://huggingface.co/spaces/Loinhoi/private-rag-chatbot)** — Try it now, no setup required!
 > **Use Cases:** Customer Support Automation · Internal Knowledge Base · Employee Onboarding · Compliance Q&A · Technical Documentation Assistant
 
 ---
